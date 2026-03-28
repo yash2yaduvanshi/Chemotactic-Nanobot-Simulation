@@ -1,28 +1,9 @@
 """
-=============================================================
-  Robothon 2026 - Interactive Live Viewer (all 5 panels)
-  ROBOTiX Club, NIT Raipur | ANANTYA'26
-=============================================================
   Author  : Yash Yaduvanshi
-
-  Run this instead of nanobot_dynamic.py when you want a
-  LIVE INTERACTIVE window — all 5 panels animate in real
-  time AND the 3D plot is draggable from any angle.
-
-  Controls (3D panel):
-    Left click + drag  -> rotate to any angle
-    Scroll wheel       -> zoom in / out
-    Right click + drag -> zoom
-    Middle drag        -> pan
-
-  Press any preset-view button below the 3D plot to snap
-  to Front / Side / Top / Isometric instantly.
-=============================================================
 """
-
 import numpy as np
 import matplotlib
-matplotlib.use("TkAgg")          # interactive backend — needs tkinter
+matplotlib.use("TkAgg")          
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.animation as animation
@@ -30,7 +11,6 @@ from matplotlib.widgets import Button
 from mpl_toolkits.mplot3d import Axes3D
 import json
 
-# ─── CONFIG — must match nanobot_dynamic.py ───────────────────────────────────
 CONFIG = {
     "source_pos"   : [9.0, 6.0, 2.0],
     "start_pos"    : [0.4, 0.5, 0.2],
@@ -50,7 +30,7 @@ SOURCE_POS = np.array(CONFIG["source_pos"])
 START_POS  = np.array(CONFIG["start_pos"])
 SPACE      = float(CONFIG["space_size"])
 
-# ─── COLOURS ─────────────────────────────────────────────────────────────────
+#  COLOURS 
 BG    = "#0a0a1a"
 PANEL = "#111133"
 CYAN  = "#00e5ff"
@@ -62,7 +42,7 @@ GRAY  = "#aaaacc"
 PURP  = "#b967ff"
 ORAN  = "#ff9100"
 
-# ─── HELPERS ─────────────────────────────────────────────────────────────────
+# HELPERS
 def _in_bounds(pos):
     p = np.asarray(pos)
     return bool(np.all(p >= 0.0) and np.all(p <= SPACE))
@@ -96,7 +76,7 @@ def estimate_gradient(pos):
         (concentration(pos+[0,0,d]) - concentration(pos-[0,0,d])) / (2*d),
     ])
 
-# ─── SIMULATION ───────────────────────────────────────────────────────────────
+# SIMULATION 
 def run_simulation():
     src_ok   = _in_bounds(SOURCE_POS)
     start_ok = _in_bounds(START_POS)
@@ -203,7 +183,7 @@ def run_simulation():
     return path, raw_c, filt_c, dist_l, grad_l, kg, mode_l, cumeff, metrics
 
 
-# ─── INTERACTIVE LIVE VIEWER ──────────────────────────────────────────────────
+# INTERACTIVE LIVE VIEWER 
 def show_live(path, raw_conc, filt_conc, dist_log,
               grad_log, k_gains, mode_log, cumeff, metrics):
 
@@ -290,7 +270,7 @@ def show_live(path, raw_conc, filt_conc, dist_log,
     leg2 = ax2.legend(fontsize=7, facecolor=BG, edgecolor="none")
     plt.setp(leg2.get_texts(), color=WHITE)
 
-    # ── Panel 3: Distance ─────────────────────────────────────────────────────
+    # Panel 3: Distance
     ax3 = fig.add_subplot(gs[1, 1])
     style2d(ax3, "Distance to Source", "Step", "Distance (u)")
     ax3.set_xlim(0,n)
@@ -302,7 +282,7 @@ def show_live(path, raw_conc, filt_conc, dist_log,
     dist_line, = ax3.plot([],[], color=CYAN, lw=2.0)
     dist_dot,  = ax3.plot([],[], "o", color=CYAN, ms=6, zorder=5)
 
-    # ── Panel 4: Gradient ─────────────────────────────────────────────────────
+    # Panel 4: Gradient
     ax4 = fig.add_subplot(gs[0, 2])
     style2d(ax4, "Gradient Strength  |grad C|", "Step", "|grad C|")
     ax4.set_xlim(0,n)
@@ -310,7 +290,7 @@ def show_live(path, raw_conc, filt_conc, dist_log,
     grad_line, = ax4.plot([],[], color=PURP, lw=1.8)
     grad_dot,  = ax4.plot([],[], "o", color=PURP, ms=6, zorder=5)
 
-    # ── Panel 5: Kalman Gain ──────────────────────────────────────────────────
+    # Panel 5: Kalman Gain
     ax5 = fig.add_subplot(gs[1, 2])
     style2d(ax5, "Kalman Gain  K = P/(P+R)", "Step", "K")
     ax5.set_xlim(0,n); ax5.set_ylim(0, 1.05)
@@ -318,7 +298,7 @@ def show_live(path, raw_conc, filt_conc, dist_log,
     gain_line, = ax5.plot([],[], color=GREEN, lw=1.8)
     gain_dot,  = ax5.plot([],[], "o", color=GREEN, ms=6, zorder=5)
 
-    # ── Panel 6: Live metrics (rows 0-1, col 3) ───────────────────────────────
+    # Panel 6: Live metrics (rows 0-1, col 3)
     ax6 = fig.add_subplot(gs[0:2, 3])
     ax6.set_facecolor(PANEL); ax6.axis("off")
     ax6.set_title("Live Metrics", color=WHITE, fontsize=10, pad=6)
@@ -345,7 +325,7 @@ def show_live(path, raw_conc, filt_conc, dist_log,
                          color=GOLD, fontsize=7.5, fontweight="bold",
                          transform=ax6.transAxes)
 
-    # ── View-angle buttons — hardcoded figure coords, no canvas.draw() needed ──
+    # View-angle buttons — hardcoded figure coords, no canvas.draw() needed
     # Buttons sit at the very bottom of the figure under the 3D panel.
     # Figure is 22in wide. Left edge of 3D panel is at left=0.04 (from gs).
     # Each button: width=0.045, height=0.04, gap=0.005
@@ -386,7 +366,7 @@ def show_live(path, raw_conc, filt_conc, dist_log,
         btn.on_clicked(make_cb(elev, azim))
         _buttons.append(btn)
 
-    # ── Animation update ──────────────────────────────────────────────────────
+    # Animation update
     def update(frame):
         i       = min(int(frame), n-1)
         is_hold = int(frame) >= n
@@ -476,7 +456,7 @@ def show_live(path, raw_conc, filt_conc, dist_log,
     return ani
 
 
-# ─── MAIN ─────────────────────────────────────────────────────────────────────
+# MAIN
 if __name__ == "__main__":
     bar = "=" * 60
     print(f"\n{bar}")
