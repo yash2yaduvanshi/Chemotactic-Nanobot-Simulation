@@ -1,0 +1,5 @@
+metrics.json
+__pycache__/
+*.pyc
+*.pyo
+nanobot_dynamic.gif
